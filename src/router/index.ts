@@ -7,7 +7,7 @@ import {
 } from "vue-router";
 import { RouteConfigs } from "/@/layout/types";
 import { split, uniqBy } from "lodash-es";
-import { i18n } from "/@/plugins/i18n";
+import { transformI18n } from "../utils/i18n";
 import { openLink } from "/@/utils/link";
 import NProgress from "/@/utils/progress";
 import { useTimeoutFn } from "@vueuse/core";
@@ -200,10 +200,15 @@ router.beforeEach((to, _from, next) => {
   const name = storageSession.getItem("info");
   NProgress.start();
   const externalLink = to?.redirectedFrom?.fullPath;
-  // @ts-ignore
-  const { t } = i18n.global;
-  // @ts-ignore
-  if (!externalLink) to.meta.title ? (document.title = t(to.meta.title)) : "";
+  if (!externalLink)
+    to.matched.some(item => {
+      item.meta.title
+        ? (document.title = transformI18n(
+            item.meta.title as string,
+            item.meta?.i18n as boolean
+          ))
+        : "";
+    });
   if (name) {
     if (_from?.name) {
       // 如果路由包含http 则是超链接 反之是普通路由
