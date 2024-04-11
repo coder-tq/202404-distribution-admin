@@ -27,5 +27,8 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "iconify.excludes": ["el"]
+  "iconify.excludes": [
+    "el"
+  ],
+  "typescript.tsdk": "node_modules/typescript/lib"
 }
