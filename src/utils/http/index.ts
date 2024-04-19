@@ -1,4 +1,5 @@
 import Axios, {
+  AxiosError,
   type AxiosInstance,
   type AxiosRequestConfig,
   type CustomParamsSerializer
@@ -167,6 +168,11 @@ class PureHttp {
           resolve(response);
         })
         .catch(error => {
+          if (error instanceof AxiosError) {
+            if ((error as AxiosError).response.status == 403) {
+              useUserStoreHook().logOut();
+            }
+          }
           reject(error);
         });
     });

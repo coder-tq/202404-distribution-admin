@@ -29,5 +29,7 @@ const toggleClick = () => {
       :icon="props.isActive ? MenuFold : MenuUnfold"
       class="inline-block align-middle hover:text-primary dark:hover:!text-white"
     />
+
+    <el-text style="padding-left: 5px">展开菜单</el-text>
   </div>
 </template>

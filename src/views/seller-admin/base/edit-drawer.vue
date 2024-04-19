@@ -1,24 +1,33 @@
 <script setup lang="ts">
 import { deviceDetection } from "@pureadmin/utils";
-import { Prop, ref, toRefs, reactive } from "vue";
+import { Prop, ref, toRefs, reactive, computed, watch, watchEffect } from "vue";
 import { useColumns } from "./columns";
 import { ElMessage } from "element-plus";
 import type { TableColumnCtx } from "element-plus";
+import { getSummaries } from "@/views/seller-admin/base/utils";
 
 const { columns } = useColumns();
 
 const isMobile = deviceDetection();
 const drawerSize = isMobile ? "100%" : "60%";
 
-const props = defineProps(["formData", "tableData"]);
+const props = defineProps(["formData", "tableData", "inventory", "disabled"]);
 const drawerVisible = defineModel("drawerVisible", { default: true });
 
-const formInline = props.formData;
-const tableData = props.tableData;
+const { formData, tableData, inventory, disabled } = toRefs(props);
+
+const computeTableData = computed(() => {
+  return tableData.value.map((item: any) => {
+    item.inventory =
+      inventory.value.find((category: any) => category.code == item.code)
+        ?.inventory - item.count;
+    item.totalPrice = item.count * item.price;
+    return item;
+  });
+});
 
 const onSubmit = () => {
-  console.log(formInline);
-  console.log(tableData);
+  console.log(disabled);
   drawerVisible.value = false;
   ElMessage({
     message: "保存成功",
@@ -26,6 +35,7 @@ const onSubmit = () => {
   });
 };
 
+// 日期组件快捷方式
 const shortcuts = [
   {
     text: "今天",
@@ -48,45 +58,6 @@ const shortcuts = [
     }
   }
 ];
-
-interface Product {
-  id: string;
-  name: string;
-  amount1: string;
-  amount2: string;
-  amount3: number;
-}
-
-interface SummaryMethodProps<T = Product> {
-  columns: TableColumnCtx<T>[];
-  data: T[];
-}
-
-const getSummaries = (param: SummaryMethodProps) => {
-  const { columns, data } = param;
-  const sums: string[] = [];
-  columns.forEach((column, index) => {
-    if (index === 0) {
-      sums[index] = "Total Cost";
-      return;
-    }
-    const values = data.map(item => Number(item[column.property]));
-    if (!values.every(value => Number.isNaN(value))) {
-      sums[index] = `$ ${values.reduce((prev, curr) => {
-        const value = Number(curr);
-        if (!Number.isNaN(value)) {
-          return prev + curr;
-        } else {
-          return prev;
-        }
-      }, 0)}`;
-    } else {
-      sums[index] = "N/A";
-    }
-  });
-
-  return sums;
-};
 </script>
 
 <template>
@@ -94,16 +65,16 @@ const getSummaries = (param: SummaryMethodProps) => {
     <!-- 买家详细信息 -->
     <el-form
       :inline="true"
-      :model="formInline"
-      :disabled="false"
+      :model="formData"
+      :disabled="disabled"
       class="demo-form-inline"
     >
       <el-form-item label="客户姓名">
-        <el-input v-model="formInline.user" placeholder="王先生" clearable />
+        <el-input v-model="formData.user" placeholder="王先生" clearable />
       </el-form-item>
       <el-form-item label="订货日期">
         <el-date-picker
-          v-model="formInline.date"
+          v-model="formData.date"
           type="date"
           placeholder="订货日期"
           :shortcuts="shortcuts"
@@ -117,7 +88,7 @@ const getSummaries = (param: SummaryMethodProps) => {
         class="!w-[80vw];display: flex;justify-content: center;"
         row-key="id"
         border
-        :data="tableData"
+        :data="computeTableData"
         :columns="columns"
         show-summary
         :summary-method="getSummaries"

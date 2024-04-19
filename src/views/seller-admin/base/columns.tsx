@@ -46,7 +46,10 @@ export function useColumns() {
       onMouseleave={() => onMouseleave(index, column.getColumnIndex())}
     >
       {!editing.value(index, column.getColumnIndex()) ? (
-        <p>{row[column.property]}</p>
+        <p>
+          {column.property === "price" ? "￥" : ""}
+          {row[column.property]}
+        </p>
       ) : (
         <>
           <el-input v-model={row[column.property]} />
@@ -73,6 +76,23 @@ export function useColumns() {
       )}
     </div>
   );
+
+  const priceCellRenderer = ({
+    row,
+    column
+  }: {
+    row?: any;
+    index?: number;
+    column?: any;
+  }) => (
+    <div class="flex-bc w-full h-[32px]">
+      <p>
+        {column.property === "totalPrice" ? "￥" : ""}
+        {row[column.property]}
+      </p>
+    </div>
+  );
+
   const columns: TableColumnList = [
     {
       label: "品类",
@@ -89,8 +109,25 @@ export function useColumns() {
       cellRenderer: cellRenderer
     },
     {
+      label: "总价",
+      prop: "totalPrice",
+      cellRenderer: priceCellRenderer
+    },
+    {
       label: "库存",
       prop: "inventory"
+    }
+  ];
+
+  const formColumns: TableColumnList = [
+    {
+      label: "品类",
+      prop: "name"
+    },
+    {
+      label: "数量",
+      prop: "count",
+      cellRenderer: cellRenderer
     }
   ];
 
@@ -101,7 +138,11 @@ export function useColumns() {
   }
 
   function onEdit(row, index, column) {
-    console.log(index, column);
+    for (let rowIndex in editMap.value) {
+      for (let columnIndex in editMap.value[rowIndex]) {
+        editMap.value[rowIndex][columnIndex].editing = false;
+      }
+    }
     if (!editMap.value[index]) {
       // 如果不存在，首先创建一个空对象
       editMap.value[index] = {};
@@ -117,6 +158,7 @@ export function useColumns() {
   }
 
   return {
-    columns
+    columns,
+    formColumns
   };
 }

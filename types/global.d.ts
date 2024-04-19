@@ -73,7 +73,7 @@ declare global {
   }
 
   /**
-   *  继承 `@pureadmin/table` 的 `TableColumns` ，方便全局直接调用
+   *  继承 `@pureadmin/seller-admin` 的 `TableColumns` ，方便全局直接调用
    */
   interface TableColumnList extends Array<TableColumns> {}
 

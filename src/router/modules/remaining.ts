@@ -26,5 +26,14 @@ export default [
         component: () => import("@/layout/redirect.vue")
       }
     ]
+  },
+  {
+    path: "/seller/form-edit",
+    name: "seller-form-edit",
+    component: () => import("@/views/seller-admin/seller-form.vue"),
+    meta: {
+      title: "供需收集",
+      showLink: false
+    }
   }
 ] satisfies Array<RouteConfigsTable>;
