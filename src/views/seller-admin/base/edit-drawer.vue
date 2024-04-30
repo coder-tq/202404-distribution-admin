@@ -5,34 +5,55 @@ import { useColumns } from "./columns";
 import { ElMessage } from "element-plus";
 import type { TableColumnCtx } from "element-plus";
 import { getSummaries } from "@/views/seller-admin/base/utils";
+import { createDistributor, updateDistributor } from "@/api/distributor";
+import { exportImg } from "@/utils/exportImage";
+import { upsertDistribution } from "@/api/distribution";
+import router from "@/router";
+import { all, create } from "mathjs";
 
 const { columns } = useColumns();
+// 去除库存、单价列
+const snapshotColumns = columns.slice(0, -3);
 
 const isMobile = deviceDetection();
 const drawerSize = isMobile ? "100%" : "60%";
 
 const props = defineProps(["formData", "tableData", "inventory", "disabled"]);
 const drawerVisible = defineModel("drawerVisible", { default: true });
+const emits = defineEmits(["emitSubmit"]);
 
 const { formData, tableData, inventory, disabled } = toRefs(props);
 
+const math = create(all, { number: "BigNumber", precision: 20 });
+
 const computeTableData = computed(() => {
   return tableData.value.map((item: any) => {
-    item.inventory =
-      inventory.value.find((category: any) => category.code == item.code)
-        ?.inventory - item.count;
-    item.totalPrice = item.count * item.price;
+    item.inventory = inventory.value.find(
+      (category: any) => category.code == item.categoryCode
+    )?.inventory;
+    item.totalPrice = math
+      .multiply(math.bignumber(item.count), math.bignumber(item.price))
+      .toString();
     return item;
   });
 });
 
-const onSubmit = () => {
-  console.log(disabled);
+const onSubmit = async () => {
+  let data = {
+    id: formData.value.id,
+    distributorName: formData.value.user,
+    distributionType: formData.value.distributionType,
+    distributorPhone: formData.value.phone,
+    date: formData.value.date.toISOString(),
+    distributionDetailList: tableData.value
+  };
+  await upsertDistribution(data);
   drawerVisible.value = false;
   ElMessage({
     message: "保存成功",
     type: "success"
   });
+  emits("emitSubmit");
 };
 
 // 日期组件快捷方式
@@ -58,48 +79,87 @@ const shortcuts = [
     }
   }
 ];
+
+const options = [
+  {
+    value: "自家车",
+    label: "自家车"
+  },
+  {
+    value: "冯车",
+    label: "冯车"
+  },
+  {
+    value: "自提",
+    label: "自提"
+  }
+];
 </script>
 
 <template>
-  <el-drawer v-model="drawerVisible" title="编辑详情" :size="drawerSize">
-    <!-- 买家详细信息 -->
-    <el-form
-      :inline="true"
-      :model="formData"
-      :disabled="disabled"
-      class="demo-form-inline"
-    >
-      <el-form-item label="客户姓名">
-        <el-input v-model="formData.user" placeholder="王先生" clearable />
-      </el-form-item>
-      <el-form-item label="订货日期">
-        <el-date-picker
-          v-model="formData.date"
-          type="date"
-          placeholder="订货日期"
-          :shortcuts="shortcuts"
-          clearable
-        />
-      </el-form-item>
+  <div>
+    <el-drawer v-model="drawerVisible" title="编辑详情" :size="drawerSize">
+      <!-- 买家详细信息 -->
+      <el-form
+        :inline="true"
+        :model="formData"
+        :disabled="disabled"
+        class="demo-form-inline"
+      >
+        <el-form-item label="客户名称">
+          <el-input v-model="formData.user" placeholder="王先生" clearable />
+        </el-form-item>
+        <el-form-item label="客户手机号">
+          <el-input
+            v-model="formData.phone"
+            placeholder="18888888888"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item label="客户自提分类">
+          <el-select
+            v-model="formData.distributionType"
+            placeholder="Select"
+            style="width: 240px"
+            clearable
+          >
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="订货日期">
+          <el-date-picker
+            v-model="formData.date"
+            type="date"
+            placeholder="订货日期"
+            :shortcuts="shortcuts"
+            clearable
+          />
+        </el-form-item>
 
-      <!-- 分割线 -->
-      <el-divider />
-      <pure-table
-        class="!w-[80vw];display: flex;justify-content: center;"
-        row-key="id"
-        border
-        :data="computeTableData"
-        :columns="columns"
-        show-summary
-        :summary-method="getSummaries"
-      />
-      <!-- 分割线 -->
-      <el-divider />
-      <el-form-item>
-        <el-button type="primary" @click="onSubmit">保存</el-button>
-      </el-form-item>
-    </el-form>
-  </el-drawer>
+        <!-- 分割线 -->
+        <el-divider />
+        <pure-table
+          class="!w-[80vw];display: flex;justify-content: center;"
+          row-key="id"
+          border
+          :data="computeTableData"
+          :columns="columns"
+          show-summary
+          :summary-method="getSummaries"
+        />
+        <!-- 分割线 -->
+        <el-divider />
+        <el-form-item>
+          <el-button type="primary" @click="onSubmit">保存</el-button>
+        </el-form-item>
+      </el-form>
+    </el-drawer>
+  </div>
 </template>
 
 <style lang="scss" scoped>

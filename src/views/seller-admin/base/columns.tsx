@@ -96,7 +96,7 @@ export function useColumns() {
   const columns: TableColumnList = [
     {
       label: "品类",
-      prop: "name"
+      prop: "categoryName"
     },
     {
       label: "数量",

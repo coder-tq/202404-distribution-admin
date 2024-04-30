@@ -1,173 +1,79 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, Ref } from "vue";
 import FixColumn from "./base/fix-column.vue";
 import EditDrawer from "./base/edit-drawer.vue";
 import { shortcuts } from "@/views/seller-admin/base/utils";
+import { Category, getCategoryByDate } from "@/api/category";
+import {
+  deleteDistribution,
+  DistributionVO,
+  exportDistributionList,
+  exportAllDistributionData,
+  exportAllDistributionDataWithPrice,
+  queryDistributionList,
+  queryDistributionListByType
+} from "@/api/distribution";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 defineOptions({
   name: "PureTable"
 });
 
 // 调用接口获取相关数据
-let categories = [
-  {
-    name: "护心肉",
-    code: 1,
-    // 初始库存
-    inventory: 10000
-  },
-  {
-    name: "心",
-    code: 2,
-    // 初始库存
-    inventory: 10000
-  },
-  {
-    name: "肝",
-    code: 3,
-    // 初始库存
-    inventory: 10000
-  },
-  {
-    name: "喉头",
-    code: 4,
-    // 初始库存
-    inventory: 10000
-  },
-  {
-    name: "肚芯",
-    code: 5,
-    // 初始库存
-    inventory: 10000
-  },
-  {
-    name: "肥肠",
-    code: 6,
-    // 初始库存
-    inventory: 10000
-  },
-  {
-    name: "长肠头",
-    code: 7,
-    // 初始库存
-    inventory: 10000
-  },
-  {
-    name: "短肠头",
-    code: 8,
-    // 初始库存
-    inventory: 10000
-  },
-  {
-    name: "明肠",
-    code: 9,
-    // 初始库存
-    inventory: 10000
-  },
-  {
-    name: "大肚",
-    code: 10,
-    // 初始库存
-    inventory: 10000
-  },
-  {
-    name: "沙肝",
-    code: 11,
-    // 初始库存
-    inventory: 10000
-  },
-  {
-    name: "花油",
-    code: 12,
-    // 初始库存
-    inventory: 10000
-  },
-  {
-    name: "十二指",
-    code: 13,
-    // 初始库存
-    inventory: 10000
-  },
-  {
-    name: "肺",
-    code: 14,
-    // 初始库存
-    inventory: 10000
-  }
-];
+let categories: Category[] = [];
 
-let dataList = [];
-// tableData 生成30条数据，随机数，name不变
-for (let i = 0; i < 30; i++) {
-  dataList.push({
-    id: i,
-    name: "小张",
-    categories: categories.map(item => ({
-      id: item.code,
-      name: item.name,
-      code: item.code + "",
-      count: Math.floor(Math.random() * 100),
-      price: Math.floor(Math.random() * 100)
-    }))
-  });
-}
-
+const date = ref(new Date());
 // 根据数据生成表格列
-const tableColumns = computed(() => {
-  return [
+const tableColumns = ref([]);
+getCategoryByDate(date.value.toISOString()).then(res => {
+  categories = res.data;
+  tableColumns.value = [
     {
       label: "买方名称",
       prop: "name",
       fixed: true
     },
     ...categories.map(item => ({
-      label: item.name,
-      prop: item.code + "",
+      label: item.name + "(" + item.inventory + ")",
+      prop: item.code,
       fixed: false
     })),
     {
       label: "操作",
       prop: "operation",
       fixed: "right",
-      slot: "operation"
+      slot: "operation",
+      "min-width": "150px"
     }
   ];
 });
 
+const dataList: Ref<DistributionVO[]> = ref([]);
+queryDistributionList(new Date().toISOString()).then(res => {
+  dataList.value = res.data;
+});
+
 // 将表格数据拍平
-const tableData = dataList.map(item => {
-  const obj = {
-    id: item.id,
-    name: item.name
-  };
-  item.categories.forEach(category => {
-    obj[category.code] = category.count;
+const tableData = computed(() => {
+  return dataList.value.map(item => {
+    const obj = {
+      id: item.id,
+      name: item.distributorName,
+      phone: item.distributorPhone,
+      distributionType: item.distributionType,
+      date: date.value
+    };
+    item.distributionDetailList.forEach(category => {
+      obj[category.categoryCode] = category.count;
+    });
+    return obj;
   });
-  return obj;
 });
 
 console.log(dataList);
 
 const clickEdit = row => {
-  // 这里可以根据需要添加明细查看逻辑
-  console.log("查看明细", row, drawerVisible);
-  formData.value = { user: row.name };
-  formTableData.value = dataList.find(item => item.id === row.id).categories;
-  // 遍历 dataList，并对每个类别的库存进行累加
-  dataList.forEach(item => {
-    if (item.id === row.id) {
-      return;
-    }
-    item.categories.forEach(category => {
-      let inventoryItem = categories.find(i => i.code == category.code);
-      if (inventoryItem) {
-        inventoryItem.inventory -= category.count;
-      }
-    });
-  });
-
-  // 将计算出的剩余库存赋值给 inventory
-  inventory.value = categories;
+  defineData(row);
   drawerVisible.value = true;
 };
 
@@ -177,24 +83,212 @@ let formData = ref({});
 let formTableData = ref([]);
 let inventory = ref([]);
 
-const date = ref(new Date());
+const editDrawer = ref(null);
+
+function defineData(row) {
+  console.log("current row", row);
+  if (!row.id) {
+    formData.value = { date: new Date() };
+    formTableData.value = [];
+    categories.forEach(category => {
+      var find = formTableData.value.find(
+        item => item.categoryCode === category.code
+      );
+      if (!find) {
+        formTableData.value.push({
+          categoryName: category.name,
+          categoryCode: category.code,
+          count: 0,
+          price: category.price
+        });
+      }
+    });
+
+    inventory.value = categories;
+    return;
+  }
+  formData.value = {
+    id: row.id,
+    user: row.name,
+    phone: row.phone,
+    date: date,
+    distributionType: row.distributionType
+  };
+  formTableData.value = dataList.value.find(
+    item => item.id === row.id
+  ).distributionDetailList;
+  categories.forEach(category => {
+    var find = formTableData.value.find(
+      item => item.categoryCode === category.code
+    );
+    if (!find) {
+      formTableData.value.push({
+        categoryName: category.name,
+        categoryCode: category.code,
+        count: 0,
+        price: category.price
+      });
+    }
+  });
+
+  inventory.value = categories;
+}
+
+const clickExport = row => {
+  defineData(row);
+  editDrawer.value.exportDataImage();
+};
+
+const clickExportWithoutPrice = row => {
+  defineData(row);
+  editDrawer.value.exportDataWithoutPriceImage();
+};
+
+const createDistributionData = () => {
+  defineData({ distributionDetailList: [] });
+  drawerVisible.value = true;
+};
+
+const refreshData = () => {
+  queryDistributionListByType(
+    date.value.toISOString(),
+    selectedType.value
+  ).then(res => {
+    dataList.value = res.data;
+  });
+};
+
+const clickDelete = async row => {
+  ElMessageBox.confirm("确定删除这条记录？", "警告", {
+    confirmButtonText: "确认删除",
+    cancelButtonText: "取消",
+    type: "warning"
+  })
+    .then(async () => {
+      await deleteDistribution(row.id);
+      await refreshData();
+      ElMessage({
+        message: "删除成功",
+        type: "success"
+      });
+    })
+    .catch(() => {});
+};
+
+const clickExportAllDistributionData = () => {
+  exportAllDistributionData(new Date().toISOString()).then(response => {
+    const url = window.URL.createObjectURL(new Blob([response]));
+    const link = document.createElement("a");
+    link.style.display = "none";
+    link.href = url;
+    link.setAttribute(
+      "download",
+      new Date().toLocaleDateString() + "配货单.zip"
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+};
+const clickExportAllDistributionDataWithPrice = () => {
+  exportAllDistributionDataWithPrice(new Date().toISOString()).then(
+    response => {
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement("a");
+      link.style.display = "none";
+      link.href = url;
+      link.setAttribute(
+        "download",
+        new Date().toLocaleDateString() + "价格单.zip"
+      );
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  );
+};
+const exportDistributionData = () => {
+  exportDistributionList(new Date().toISOString()).then(response => {
+    const url = window.URL.createObjectURL(new Blob([response]));
+    const link = document.createElement("a");
+    link.style.display = "none";
+    link.href = url;
+    link.setAttribute(
+      "download",
+      new Date().toLocaleDateString() + "汇总数据.xlsx"
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+};
+
+const selectedType = ref("");
+
+const options = [
+  {
+    value: "自家车",
+    label: "自家车"
+  },
+  {
+    value: "冯车",
+    label: "冯车"
+  },
+  {
+    value: "自提",
+    label: "自提"
+  }
+];
 </script>
 
 <template>
   <div>
     <el-card shadow="never">
       <el-row class="row-bg">
-        <el-col :span="8"
-          ><el-text class="mx-1">订货日期：</el-text>
-          <el-date-picker
-            v-model="date"
-            type="date"
-            placeholder="订货日期"
-            :shortcuts="shortcuts"
-            clearable
-        /></el-col>
-        <el-col :span="16">
-          <el-button>导出所有数据</el-button>
+        <el-col :span="12">
+          <!--          <el-text class="mx-1">订货日期：</el-text>-->
+          <!--          <el-date-picker-->
+          <!--            v-model="date"-->
+          <!--            type="date"-->
+          <!--            placeholder="订货日期"-->
+          <!--            :shortcuts="shortcuts"-->
+          <!--            clearable-->
+          <!--        />-->
+          <el-row>
+            <el-col :span="3"> <el-text class="mx-1">分类：</el-text></el-col>
+            <el-col :span="10">
+              <el-select
+                v-model="selectedType"
+                placeholder="Select"
+                inline
+                clearable
+              >
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                /> </el-select
+            ></el-col>
+            <el-col :span="1" />
+            <el-col :span="9">
+              <el-button type="primary" @click="refreshData"
+                >查询</el-button
+              ></el-col
+            >
+          </el-row>
+        </el-col>
+        <el-col :span="12" style="text-align: right">
+          <el-button type="primary" @click="createDistributionData"
+            >新建配货数据</el-button
+          >
+          <el-button @click="clickExportAllDistributionData"
+            >导出配货单</el-button
+          >
+          <el-button @click="clickExportAllDistributionDataWithPrice"
+            >导出价格单</el-button
+          >
+          <el-button @click="exportDistributionData">导出汇总数据</el-button>
         </el-col>
       </el-row>
       <el-divider />
@@ -202,13 +296,18 @@ const date = ref(new Date());
         :table-data="tableData"
         :table-columns="tableColumns"
         @clickEdit="clickEdit"
+        @clickExport="clickExport"
+        @clickDelete="clickDelete"
+        @clickExportWithoutPrice="clickExportWithoutPrice"
       />
     </el-card>
     <EditDrawer
+      ref="editDrawer"
       v-model:drawerVisible="drawerVisible"
       :formData="formData"
       :table-data="formTableData"
       :inventory="inventory"
+      @emitSubmit="refreshData"
     />
   </div>
 </template>

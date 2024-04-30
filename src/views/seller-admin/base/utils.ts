@@ -1,6 +1,10 @@
+import { create, all } from "mathjs";
+
 export function getSummaries(param) {
   const { columns, data } = param;
   const sums: string[] = [];
+
+  const math = create(all);
   columns.forEach((column, index) => {
     if (index === 0) {
       sums[index] = "合计";
@@ -18,7 +22,7 @@ export function getSummaries(param) {
       sums[index] = `${values.reduce((prev, curr) => {
         const value = Number(curr);
         if (!Number.isNaN(value)) {
-          return prev + curr;
+          return math.add(prev, curr);
         } else {
           return prev;
         }

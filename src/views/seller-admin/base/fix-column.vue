@@ -15,10 +15,26 @@ const props = defineProps<{
   tableColumns?: any[];
 }>();
 
-const emits = defineEmits(["clickEdit"]);
+const emits = defineEmits([
+  "clickEdit",
+  "clickExport",
+  "clickDelete",
+  "clickExportWithoutPrice"
+]);
 
 function handleClick(row) {
   emits("clickEdit", row);
+}
+
+function handleClickExport(row) {
+  emits("clickExport", row);
+}
+
+function handleClickExportWithoutPrice(row) {
+  emits("clickExportWithoutPrice", row);
+}
+function handleClickDelete(row) {
+  emits("clickDelete", row);
 }
 </script>
 
@@ -34,6 +50,14 @@ function handleClick(row) {
     <template #operation="{ row }">
       <el-button link type="primary" size="small" @click="handleClick(row)"
         >编辑</el-button
+      >
+
+      <el-button
+        link
+        type="primary"
+        size="small"
+        @click="handleClickDelete(row)"
+        >删除</el-button
       >
     </template>
   </pure-table>

@@ -13,7 +13,8 @@ export default {
       component: () => import("@/views/distributor-admin/index.vue"),
       meta: {
         title: "供销商管理",
-        roles: ["admin"]
+        roles: ["admin"],
+        showLink: false
       }
     }
   ]

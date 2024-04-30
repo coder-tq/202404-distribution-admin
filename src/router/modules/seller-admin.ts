@@ -22,6 +22,16 @@ export default {
       component: () => import("@/views/seller-admin/seller-form.vue"),
       meta: {
         title: "供销数据填写",
+        roles: ["admin"],
+        showLink: false
+      }
+    },
+    {
+      path: "/seller-admin/category",
+      name: "seller-category",
+      component: () => import("@/views/category-admin/category-admin.vue"),
+      meta: {
+        title: "分类管理",
         roles: ["admin"]
       }
     }
