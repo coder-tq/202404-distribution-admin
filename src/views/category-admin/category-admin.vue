@@ -2,6 +2,7 @@
 import { ref, watch } from "vue";
 import EditDrawer from "@/views/category-admin/base/edit-drawer.vue";
 import { getCategoryByDate } from "@/api/category";
+import CreateDrawer from "@/views/category-admin/base/create-drawer.vue";
 
 const categoryData = ref([]);
 
@@ -27,6 +28,10 @@ const tableColumns = [
     prop: "totalInventory"
   },
   {
+    label: "排序",
+    prop: "sortBy"
+  },
+  {
     label: "操作",
     prop: "operation",
     fixed: "right",
@@ -39,14 +44,22 @@ const formData = ref({});
 const handleClick = (row: any) => {
   drawerVisible.value = true;
   formData.value = row;
+  drawerDisabled.value = true;
 };
-
+const handleCreateDistributor = () => {
+  formData.value = {
+    sortBy: 0
+  };
+  createDrawerVisible.value = true;
+};
 const emitSubmit = () => {
   getCategoryByDate(new Date().toISOString()).then(res => {
     categoryData.value = res.data;
   });
 };
 const date = new Date();
+const drawerDisabled = ref(true);
+const createDrawerVisible = ref(false);
 </script>
 
 <template>
@@ -54,9 +67,9 @@ const date = new Date();
     <el-card>
       <el-text class="mx-1">记录日期：</el-text>
       <el-date-picker v-model="date" type="date" disabled clearable />
-      <!--      <el-button type="primary" @click="handleCreateDistributor()"-->
-      <!--        >新建</el-button-->
-      <!--      >-->
+      <el-button type="primary" @click="handleCreateDistributor()"
+        >新建</el-button
+      >
       <el-divider />
       <pure-table
         :data="categoryData"
@@ -72,6 +85,12 @@ const date = new Date();
       </pure-table>
       <EditDrawer
         v-model:drawerVisible="drawerVisible"
+        :form-data="formData"
+        :disabled="drawerDisabled"
+        @emitSubmit="emitSubmit"
+      />
+      <create-drawer
+        v-model:drawer-visible="createDrawerVisible"
         :form-data="formData"
         @emitSubmit="emitSubmit"
       />

@@ -5,7 +5,7 @@ import { ElMessage } from "element-plus";
 import type { TableColumnCtx } from "element-plus";
 import { getSummaries } from "@/views/seller-admin/base/utils";
 import { createDistributor, updateDistributor } from "@/api/distributor";
-import { updateCategoryByDate } from "@/api/category";
+import { createCategory, updateCategoryByDate } from "@/api/category";
 
 const isMobile = deviceDetection();
 const drawerSize = isMobile ? "100%" : "60%";
@@ -17,13 +17,16 @@ const emits = defineEmits(["emitSubmit"]);
 const { formData, tableData, inventory, disabled } = toRefs(props);
 
 const onSubmit = async () => {
-  await updateCategoryByDate({
-    categoryId: formData.value.id,
-    price: formData.value.price,
-    inventory: formData.value.inventory,
-    sortBy: formData.value.sortBy,
-    date: new Date().toISOString()
+  var promise = await createCategory({
+    name: formData.value.name,
+    code: formData.value.code,
+    sortBy: formData.value.sortBy
   });
+  if (promise.code == 0) {
+    ElMessage.success("保存成功");
+  } else {
+    ElMessage.error(promise.message);
+  }
   drawerVisible.value = false;
   emits("emitSubmit");
 };
@@ -49,14 +52,13 @@ const onSubmit = async () => {
           clearable
         />
       </el-form-item>
-      <el-form-item label="类别库存">
-        <el-input v-model="formData.inventory" placeholder="10" clearable />
-      </el-form-item>
       <el-form-item label="类别排序">
-        <el-input-number v-model="formData.sortBy" placeholder="10" clearable />
-      </el-form-item>
-      <el-form-item label="今日单价">
-        <el-input v-model="formData.price" placeholder="10" clearable />
+        <el-input-number
+          v-model="formData.sortBy"
+          placeholder="10"
+          clearable
+          :precision="0"
+        />
       </el-form-item>
       <!-- 分割线 -->
       <el-divider />

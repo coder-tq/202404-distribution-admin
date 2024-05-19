@@ -8,6 +8,7 @@ export type DistributionVO = {
   distributionType: string;
   distributorPhone: string;
   date: string;
+  distributorSortBy: number;
   distributionDetailList: {
     id: string;
     categoryId: string;

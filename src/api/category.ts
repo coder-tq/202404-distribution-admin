@@ -44,6 +44,7 @@ type UpdateCategoryRequest = {
   price: string;
   inventory: string;
   date: string;
+  sortBy: number;
 };
 
 export const updateCategoryByDate = (
@@ -54,6 +55,24 @@ export const updateCategoryByDate = (
     baseUrlApi("/category/updateByDate"),
     {
       data: updateCategoryRequest
+    }
+  );
+};
+
+type CreateCategoryRequest = {
+  name: string;
+  code: string;
+  sortBy: string;
+};
+
+export const createCategory = (
+  createCategoryRequest: CreateCategoryRequest
+) => {
+  return http.request<Result<boolean>>(
+    "post",
+    baseUrlApi("/category/createCategory"),
+    {
+      data: createCategoryRequest
     }
   );
 };

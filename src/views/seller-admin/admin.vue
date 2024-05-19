@@ -61,7 +61,8 @@ const tableData = computed(() => {
       name: item.distributorName,
       phone: item.distributorPhone,
       distributionType: item.distributionType,
-      date: date.value
+      date: date.value,
+      sortBy: item.distributorSortBy
     };
     item.distributionDetailList.forEach(category => {
       obj[category.categoryCode] = category.count;
@@ -88,7 +89,7 @@ const editDrawer = ref(null);
 function defineData(row) {
   console.log("current row", row);
   if (!row.id) {
-    formData.value = { date: new Date() };
+    formData.value = { date: new Date(), sortBy: 0 };
     formTableData.value = [];
     categories.forEach(category => {
       var find = formTableData.value.find(
@@ -112,6 +113,7 @@ function defineData(row) {
     user: row.name,
     phone: row.phone,
     date: date,
+    sortBy: row.sortBy,
     distributionType: row.distributionType
   };
   formTableData.value = dataList.value.find(

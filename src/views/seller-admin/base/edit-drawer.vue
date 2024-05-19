@@ -45,6 +45,7 @@ const onSubmit = async () => {
     distributionType: formData.value.distributionType,
     distributorPhone: formData.value.phone,
     date: formData.value.date.toISOString(),
+    distributorSortBy: formData.value.sortBy,
     distributionDetailList: tableData.value
   };
   await upsertDistribution(data);
@@ -115,6 +116,10 @@ const options = [
             placeholder="18888888888"
             clearable
           />
+        </el-form-item>
+
+        <el-form-item label="客户排序">
+          <el-input-number v-model="formData.sortBy" :precision="0" />
         </el-form-item>
         <el-form-item label="客户自提分类">
           <el-select
