@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import EditDrawer from "@/views/category-admin/base/edit-drawer.vue";
-import { getCategoryByDate } from "@/api/category";
+import { deleteCategory, getCategoryByDate } from "@/api/category";
 import CreateDrawer from "@/views/category-admin/base/create-drawer.vue";
 
 const categoryData = ref([]);
 
-getCategoryByDate(new Date().toISOString()).then(res => {
-  categoryData.value = res.data;
-});
+const refreshCategoryData = () => {
+  getCategoryByDate(new Date().toISOString()).then(res => {
+    categoryData.value = res.data;
+  });
+};
+
+refreshCategoryData();
 
 const tableColumns = [
   {
@@ -46,6 +50,11 @@ const handleClick = (row: any) => {
   formData.value = row;
   drawerDisabled.value = true;
 };
+
+const handleDeleteCategory = async (row: any) => {
+  await deleteCategory(row.id);
+  refreshCategoryData();
+};
 const handleCreateDistributor = () => {
   formData.value = {
     sortBy: 0
@@ -80,6 +89,14 @@ const createDrawerVisible = ref(false);
         <template #operation="{ row }">
           <el-button link type="primary" size="small" @click="handleClick(row)"
             >编辑</el-button
+          >
+
+          <el-button
+            link
+            type="primary"
+            size="small"
+            @click="handleDeleteCategory(row)"
+            >删除</el-button
           >
         </template>
       </pure-table>

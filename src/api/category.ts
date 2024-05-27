@@ -76,3 +76,13 @@ export const createCategory = (
     }
   );
 };
+
+export const deleteCategory = (categoryId: string) => {
+  return http.request<Result<boolean>>(
+    "post",
+    baseUrlApi("/category/deleteCategory"),
+    {
+      params: { id: categoryId }
+    }
+  );
+};

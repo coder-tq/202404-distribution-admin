@@ -25,34 +25,8 @@ let categories: Category[] = [];
 const date = ref(new Date());
 // 根据数据生成表格列
 const tableColumns = ref([]);
-getCategoryByDate(date.value.toISOString()).then(res => {
-  categories = res.data;
-  tableColumns.value = [
-    {
-      label: "买方名称",
-      prop: "name",
-      fixed: true
-    },
-    ...categories.map(item => ({
-      label: item.name + "(" + item.inventory + ")",
-      prop: item.code,
-      fixed: false
-    })),
-    {
-      label: "操作",
-      prop: "operation",
-      fixed: "right",
-      slot: "operation",
-      "min-width": "150px"
-    }
-  ];
-});
 
 const dataList: Ref<DistributionVO[]> = ref([]);
-queryDistributionList(new Date().toISOString()).then(res => {
-  dataList.value = res.data;
-});
-
 // 将表格数据拍平
 const tableData = computed(() => {
   return dataList.value.map(item => {
@@ -71,7 +45,39 @@ const tableData = computed(() => {
   });
 });
 
-console.log(dataList);
+const selectedType = ref("");
+const refreshData = () => {
+  getCategoryByDate(date.value.toISOString()).then(res => {
+    categories = res.data;
+    tableColumns.value = [
+      {
+        label: "买方名称",
+        prop: "name",
+        fixed: true
+      },
+      ...categories.map(item => ({
+        label: item.name + "(" + item.inventory + ")",
+        prop: item.code,
+        fixed: false
+      })),
+      {
+        label: "操作",
+        prop: "operation",
+        fixed: "right",
+        slot: "operation",
+        "min-width": "150px"
+      }
+    ];
+  });
+  queryDistributionListByType(
+    date.value.toISOString(),
+    selectedType.value
+  ).then(res => {
+    dataList.value = res.data;
+  });
+};
+
+refreshData();
 
 const clickEdit = row => {
   defineData(row);
@@ -151,15 +157,6 @@ const createDistributionData = () => {
   drawerVisible.value = true;
 };
 
-const refreshData = () => {
-  queryDistributionListByType(
-    date.value.toISOString(),
-    selectedType.value
-  ).then(res => {
-    dataList.value = res.data;
-  });
-};
-
 const clickDelete = async row => {
   ElMessageBox.confirm("确定删除这条记录？", "警告", {
     confirmButtonText: "确认删除",
@@ -225,8 +222,6 @@ const exportDistributionData = () => {
   });
 };
 
-const selectedType = ref("");
-
 const options = [
   {
     value: "自家车",
@@ -248,14 +243,14 @@ const options = [
     <el-card shadow="never">
       <el-row class="row-bg">
         <el-col :span="12">
-          <!--          <el-text class="mx-1">订货日期：</el-text>-->
-          <!--          <el-date-picker-->
-          <!--            v-model="date"-->
-          <!--            type="date"-->
-          <!--            placeholder="订货日期"-->
-          <!--            :shortcuts="shortcuts"-->
-          <!--            clearable-->
-          <!--        />-->
+          <el-text class="mx-1">订货日期：</el-text>
+          <el-date-picker
+            v-model="date"
+            type="date"
+            placeholder="订货日期"
+            :shortcuts="shortcuts"
+            clearable
+          />
           <el-row>
             <el-col :span="3"> <el-text class="mx-1">分类：</el-text></el-col>
             <el-col :span="10">
