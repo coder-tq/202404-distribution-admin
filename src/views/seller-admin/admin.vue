@@ -242,7 +242,7 @@ const options = [
   <div>
     <el-card shadow="never">
       <el-row class="row-bg">
-        <el-col :span="12">
+        <el-col :span="5">
           <el-text class="mx-1">订货日期：</el-text>
           <el-date-picker
             v-model="date"
@@ -251,6 +251,8 @@ const options = [
             :shortcuts="shortcuts"
             clearable
           />
+        </el-col>
+        <el-col :span="7">
           <el-row>
             <el-col :span="3"> <el-text class="mx-1">分类：</el-text></el-col>
             <el-col :span="10">
