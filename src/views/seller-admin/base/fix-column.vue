@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import {ref, toRefs} from "vue";
 import { getSummaries } from "@/views/seller-admin/base/utils";
 
 type TableColumn = {
@@ -14,6 +14,7 @@ const props = defineProps<{
   tableData?: any[];
   tableColumns?: any[];
 }>();
+const tableData = toRefs(props).tableData;
 
 const emits = defineEmits([
   "clickEdit",

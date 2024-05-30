@@ -46,8 +46,8 @@ const tableData = computed(() => {
 });
 
 const selectedType = ref("");
-const refreshData = () => {
-  getCategoryByDate(date.value.toISOString()).then(res => {
+const refreshData = async () => {
+  await getCategoryByDate(date.value.toISOString()).then(res => {
     categories = res.data;
     tableColumns.value = [
       {
@@ -69,11 +69,13 @@ const refreshData = () => {
       }
     ];
   });
-  queryDistributionListByType(
+  await queryDistributionListByType(
     date.value.toISOString(),
     selectedType.value
   ).then(res => {
     dataList.value = res.data;
+    console.log(dataList);
+    console.log(tableData)
   });
 };
 
@@ -95,7 +97,7 @@ const editDrawer = ref(null);
 function defineData(row) {
   console.log("current row", row);
   if (!row.id) {
-    formData.value = { date: new Date(), sortBy: 0 };
+    formData.value = { date: date.value, sortBy: 0 };
     formTableData.value = [];
     categories.forEach(category => {
       var find = formTableData.value.find(
@@ -175,14 +177,14 @@ const clickDelete = async row => {
 };
 
 const clickExportAllDistributionData = () => {
-  exportAllDistributionData(new Date().toISOString()).then(response => {
+  exportAllDistributionData(date.value.toISOString()).then(response => {
     const url = window.URL.createObjectURL(new Blob([response]));
     const link = document.createElement("a");
     link.style.display = "none";
     link.href = url;
     link.setAttribute(
       "download",
-      new Date().toLocaleDateString() + "配货单.zip"
+      date.value.toLocaleDateString() + "配货单.zip"
     );
     document.body.appendChild(link);
     link.click();
@@ -190,7 +192,7 @@ const clickExportAllDistributionData = () => {
   });
 };
 const clickExportAllDistributionDataWithPrice = () => {
-  exportAllDistributionDataWithPrice(new Date().toISOString()).then(
+  exportAllDistributionDataWithPrice(date.value.toISOString()).then(
     response => {
       const url = window.URL.createObjectURL(new Blob([response]));
       const link = document.createElement("a");
@@ -198,7 +200,7 @@ const clickExportAllDistributionDataWithPrice = () => {
       link.href = url;
       link.setAttribute(
         "download",
-        new Date().toLocaleDateString() + "价格单.zip"
+        date.value.toLocaleDateString() + "价格单.zip"
       );
       document.body.appendChild(link);
       link.click();
@@ -207,14 +209,14 @@ const clickExportAllDistributionDataWithPrice = () => {
   );
 };
 const exportDistributionData = () => {
-  exportDistributionList(new Date().toISOString()).then(response => {
+  exportDistributionList(date.value.toISOString()).then(response => {
     const url = window.URL.createObjectURL(new Blob([response]));
     const link = document.createElement("a");
     link.style.display = "none";
     link.href = url;
     link.setAttribute(
       "download",
-      new Date().toLocaleDateString() + "汇总数据.xlsx"
+      date.value.toLocaleDateString() + "汇总数据.xlsx"
     );
     document.body.appendChild(link);
     link.click();

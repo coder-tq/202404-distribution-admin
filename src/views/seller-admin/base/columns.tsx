@@ -39,25 +39,27 @@ export function useColumns() {
   }) => (
     <div
       class="flex-bc w-full h-[32px]"
-      onMouseenter={() => {
-        activeIndex.value = index;
-        activeColumn.value = column.getColumnIndex();
-      }}
+      // onMouseenter={() => {
+      //   activeIndex.value = index;
+      //   activeColumn.value = column.getColumnIndex();
+      // }}
       onMouseleave={() => onMouseleave(index, column.getColumnIndex())}
     >
-      {!editing.value(index, column.getColumnIndex()) ? (
-        <p>
-          {column.property === "price" ? "￥" : ""}
-          {row[column.property]}
-        </p>
-      ) : (
+      {
+      //   !editing.value(index, column.getColumnIndex()) ? (
+      //   <p>
+      //     {column.property === "price" ? "￥" : ""}
+      //     {row[column.property]}
+      //   </p>
+      // ) :
+          (
         <>
-          <el-input v-model={row[column.property]} />
-          <iconify-icon-offline
-            icon={Check}
-            class={iconClass.value(index, column.getColumnIndex())}
-            onClick={() => onSave(index, column.getColumnIndex())}
-          />
+          <el-input-number size="small" v-model={row[column.property]} />
+          {/*<iconify-icon-offline*/}
+          {/*  icon={Check}*/}
+          {/*  class={iconClass.value(index, column.getColumnIndex())}*/}
+          {/*  onClick={() => onSave(index, column.getColumnIndex())}*/}
+          {/*/>*/}
         </>
       )}
       {activeIndex.value == index &&
