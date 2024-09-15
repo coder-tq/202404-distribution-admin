@@ -37,18 +37,52 @@ function handleClickExportWithoutPrice(row) {
 function handleClickDelete(row) {
   emits("clickDelete", row);
 }
+
+// 斑马纹
+function sellerTableRowClass(row) {
+  if (row.rowIndex % 2 === 0) {
+    return "seller-table-sign-row";
+  } else {
+    return "";
+  }
+}
+
+// 修改悬停列头样式
+function cellMouseEnterEvent(row, column, cell, event) {
+  if (column.label === "操作" || column.getColumnIndex() === 0) {
+    return;
+  }
+  const cols = document.querySelectorAll("." + column.id);
+  cols.forEach(col => {
+    col.classList.add("seller_table-cell-active");
+  });
+}
+
+function cellMouseLeaveEvent(row, column, cell, event) {
+  if (column.label === "操作" || column.getColumnIndex() === 0) {
+    return;
+  }
+  const cols = document.querySelectorAll("." + column.id);
+  cols.forEach(col => {
+    col.classList.remove("seller_table-cell-active");
+  });
+}
 </script>
 
 <template>
   <pure-table
+    id="seller-table"
     :data="tableData"
     :columns="tableColumns"
     :border="true"
     show-summary
     :summary-method="getSummaries"
     class="!h-[70vh]"
-    row-style="font-size: 16px; font-weight: 600"
-    stripe
+    style="font-size: 16px; font-weight: 600"
+    :row-class-name="sellerTableRowClass"
+    header-cell-class-name="seller-table-header-cell"
+    @cell-mouse-enter="cellMouseEnterEvent"
+    @cell-mouse-leave="cellMouseLeaveEvent"
   >
     <template #operation="{ row }">
       <el-button link type="primary" size="small" @click="handleClick(row)"
@@ -65,3 +99,27 @@ function handleClickDelete(row) {
     </template>
   </pure-table>
 </template>
+
+<style lang="scss">
+#seller-table {
+  .seller-table-sign-row {
+    background-color: #f0f7faff !important;
+  }
+
+  .el-table .el-table__body tr:hover > td {
+    background-color: #accaf8 !important;
+  }
+
+  .seller-table-header-cell {
+    color: black !important;
+  }
+
+  .seller_table-cell-active {
+    background-color: #accaf8 !important;
+  }
+
+  .el-button:hover {
+    color: #002ead !important;
+  }
+}
+</style>

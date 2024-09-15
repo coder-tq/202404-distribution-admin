@@ -162,4 +162,30 @@ html.dark {
       background: rgb(92 93 96);
     }
   }
+
+  #seller-table {
+    .seller-table-sign-row {
+      background-color: #787979 !important;
+    }
+
+    .seller-table-header-cell {
+      color: white !important;
+    }
+
+    .el-table .el-table__body tr:hover > td {
+      background-color: #7a8ead !important;
+    }
+
+    .seller_table-cell-active {
+      background-color: #7a8ead !important;
+    }
+
+    .el-button {
+      color: rgb(100 177 227);
+    }
+
+    .el-button:hover {
+      color: #0344f8 !important;
+    }
+  }
 }

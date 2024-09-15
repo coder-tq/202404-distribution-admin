@@ -39,7 +39,7 @@ const tableData = computed(() => {
       sortBy: item.distributorSortBy
     };
     item.distributionDetailList.forEach(category => {
-      obj[category.categoryCode] = category.count;
+      obj[category.categoryCode] = category.count == "0" ? "-" : category.count;
     });
     return obj;
   });
