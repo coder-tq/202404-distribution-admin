@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, toRefs} from "vue";
+import { ref, toRefs } from "vue";
 import { getSummaries } from "@/views/seller-admin/base/utils";
 
 type TableColumn = {
@@ -47,6 +47,8 @@ function handleClickDelete(row) {
     show-summary
     :summary-method="getSummaries"
     class="!h-[70vh]"
+    row-style="font-size: 16px; font-weight: 600"
+    stripe
   >
     <template #operation="{ row }">
       <el-button link type="primary" size="small" @click="handleClick(row)"

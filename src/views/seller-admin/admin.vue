@@ -56,7 +56,7 @@ const refreshData = async () => {
         fixed: true
       },
       ...categories.map(item => ({
-        label: item.name + "(" + item.inventory + ")",
+        label: item.name,
         prop: item.code,
         fixed: false
       })),
@@ -75,7 +75,7 @@ const refreshData = async () => {
   ).then(res => {
     dataList.value = res.data;
     console.log(dataList);
-    console.log(tableData)
+    console.log(tableData);
   });
 };
 
