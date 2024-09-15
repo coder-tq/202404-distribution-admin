@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import { deviceDetection } from "@pureadmin/utils";
-import { Prop, ref, toRefs, reactive, computed, watch, watchEffect } from "vue";
+import {
+  Prop,
+  ref,
+  toRefs,
+  reactive,
+  computed,
+  watch,
+  watchEffect,
+  onMounted,
+  onUnmounted
+} from "vue";
 import { useColumns } from "./columns";
 import { ElMessage } from "element-plus";
 import type { TableColumnCtx } from "element-plus";
@@ -95,6 +105,24 @@ const options = [
     label: "自提"
   }
 ];
+
+const screenHeight = ref(window.innerHeight);
+
+const updateTableHeight = () => {
+  screenHeight.value = window.innerHeight;
+};
+
+onMounted(() => {
+  window.addEventListener("resize", updateTableHeight);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", updateTableHeight);
+});
+
+const heights = computed(() => {
+  return Number(Math.ceil(screenHeight.value - 400));
+});
 </script>
 
 <template>
@@ -148,6 +176,7 @@ const options = [
 
         <!-- 分割线 -->
         <el-divider />
+
         <pure-table
           class="!w-[80vw];display: flex;justify-content: center;"
           row-key="id"
@@ -156,7 +185,9 @@ const options = [
           :columns="columns"
           show-summary
           :summary-method="getSummaries"
+          :max-height="heights"
         />
+
         <!-- 分割线 -->
         <el-divider />
         <el-form-item>
