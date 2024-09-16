@@ -48,7 +48,17 @@ const computeTableData = computed(() => {
   });
 });
 
+// 表单校验规则
+const rules = {
+  user: [{ required: true, message: "请输入名称", trigger: "blur" }],
+  sortBy: [{ required: true, message: "请输入排序", trigger: "blur" }],
+  distributionType: [{ required: true, message: "请选择分类", trigger: "blur" }]
+};
+
+const form = ref();
+
 const onSubmit = async () => {
+  await form.value.validate();
   let data = {
     id: formData.value.id,
     distributorName: formData.value.user,
@@ -106,12 +116,13 @@ const options = [
   }
 ];
 
+// 窗口高度
 const screenHeight = ref(window.innerHeight);
 
 const updateTableHeight = () => {
   screenHeight.value = window.innerHeight;
 };
-
+// 监听窗口变化
 onMounted(() => {
   window.addEventListener("resize", updateTableHeight);
 });
@@ -119,7 +130,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener("resize", updateTableHeight);
 });
-
+// 表格高度自适应窗口
 const heights = computed(() => {
   return Number(Math.ceil(screenHeight.value - 400));
 });
@@ -130,15 +141,17 @@ const heights = computed(() => {
     <el-drawer v-model="drawerVisible" title="编辑详情" :size="drawerSize">
       <!-- 买家详细信息 -->
       <el-form
+        ref="form"
         :inline="true"
         :model="formData"
         :disabled="disabled"
         class="demo-form-inline"
+        :rules="rules"
       >
-        <el-form-item label="客户名称">
+        <el-form-item prop="user" label="客户名称">
           <el-input v-model="formData.user" placeholder="王先生" clearable />
         </el-form-item>
-        <el-form-item label="客户手机号">
+        <el-form-item prop="phone" label="客户手机号">
           <el-input
             v-model="formData.phone"
             placeholder="18888888888"
@@ -146,10 +159,10 @@ const heights = computed(() => {
           />
         </el-form-item>
 
-        <el-form-item label="客户排序">
+        <el-form-item prop="sortBy" label="客户排序">
           <el-input-number v-model="formData.sortBy" :precision="0" />
         </el-form-item>
-        <el-form-item label="客户自提分类">
+        <el-form-item prop="distributionType" label="客户自提分类">
           <el-select
             v-model="formData.distributionType"
             placeholder="Select"
