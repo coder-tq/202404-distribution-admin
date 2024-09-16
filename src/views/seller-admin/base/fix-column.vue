@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, toRefs } from "vue";
 import { getSummaries } from "@/views/seller-admin/base/utils";
+import { upsertDistribution } from "@/api/distribution";
+import { ElMessage } from "element-plus";
 
 type TableColumn = {
   label: string;
@@ -13,6 +15,7 @@ const props = defineProps<{
   height?: string;
   tableData?: any[];
   tableColumns?: any[];
+  tbLoading?: boolean;
 }>();
 const tableData = toRefs(props).tableData;
 
@@ -47,8 +50,27 @@ function sellerTableRowClass(row) {
   }
 }
 
-// 修改悬停列头样式
+const inputNumberChange = async (row: any, column: any, e: Event) => {
+  row.oldDetailList[column.getColumnIndex() - 1]["count"] = e;
+  // 其他逻辑...
+  let data = {
+    id: row.id,
+    distributorName: row.name,
+    distributionType: row.distributionType,
+    distributorPhone: row.phone,
+    date: row.date.toISOString(),
+    distributorSortBy: row.sortBy,
+    distributionDetailList: row.oldDetailList
+  };
+  await upsertDistribution(data);
+  ElMessage({
+    message: "保存成功",
+    type: "success"
+  });
+};
+
 function cellMouseEnterEvent(row, column, cell, event) {
+  // 修改悬停列头样式
   if (column.label === "操作" || column.getColumnIndex() === 0) {
     return;
   }
@@ -73,6 +95,7 @@ function cellMouseLeaveEvent(row, column, cell, event) {
   <pure-table
     id="seller-table"
     :data="tableData"
+    v-loading="tbLoading"
     :columns="tableColumns"
     :border="true"
     show-summary
@@ -116,6 +139,7 @@ function cellMouseLeaveEvent(row, column, cell, event) {
 
   .seller_table-cell-active {
     background-color: #accaf8 !important;
+    transition: 0.4s;
   }
 
   .el-button:hover {

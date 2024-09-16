@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="tsx">
 import { ref, computed, Ref } from "vue";
 import FixColumn from "./base/fix-column.vue";
 import EditDrawer from "./base/edit-drawer.vue";
@@ -14,6 +14,7 @@ import {
   queryDistributionListByType
 } from "@/api/distribution";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { sellerTableColumns } from "@/views/seller-admin/base/seller-table-columns";
 
 defineOptions({
   name: "PureTable"
@@ -36,19 +37,26 @@ const tableData = computed(() => {
       phone: item.distributorPhone,
       distributionType: item.distributionType,
       date: date.value,
-      sortBy: item.distributorSortBy
+      sortBy: item.distributorSortBy,
+      oldDetailList: item.distributionDetailList
     };
     item.distributionDetailList.forEach(category => {
-      obj[category.categoryCode] = category.count == "0" ? "-" : category.count;
+      obj[category.categoryCode] = category.count;
     });
     return obj;
   });
 });
 
+let tbLoading = false;
+
 const selectedType = ref("");
+const { cellRenderer } = sellerTableColumns();
 const refreshData = async () => {
+  tbLoading = true;
+  // 根据日期获取分类（表头）
   await getCategoryByDate(date.value.toISOString()).then(res => {
     categories = res.data;
+    console.log("categories", categories);
     tableColumns.value = [
       {
         label: "买方名称",
@@ -58,7 +66,9 @@ const refreshData = async () => {
       ...categories.map(item => ({
         label: item.name,
         prop: item.code,
-        fixed: false
+        fixed: false,
+        cellRenderer: cellRenderer,
+        "min-width": 124
       })),
       {
         label: "操作",
@@ -74,8 +84,9 @@ const refreshData = async () => {
     selectedType.value
   ).then(res => {
     dataList.value = res.data;
-    console.log(dataList);
-    console.log(tableData);
+    console.log("dataList", dataList);
+    console.log("tableData", tableData);
+    tbLoading = false;
   });
 };
 
@@ -296,6 +307,7 @@ const options = [
       <FixColumn
         :table-data="tableData"
         :table-columns="tableColumns"
+        :tb-loading="tbLoading"
         @clickEdit="clickEdit"
         @clickExport="clickExport"
         @clickDelete="clickDelete"
