@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 import EditDrawer from "@/views/category-admin/base/edit-drawer.vue";
 import { deleteCategory, getCategoryByDate } from "@/api/category";
 import CreateDrawer from "@/views/category-admin/base/create-drawer.vue";
+import { categoryColumns } from "@/views/category-admin/base/columns";
 
 const categoryData = ref([]);
 
@@ -13,6 +14,8 @@ const refreshCategoryData = () => {
 };
 
 refreshCategoryData();
+
+const { cellRenderer } = categoryColumns();
 
 const tableColumns = [
   {
@@ -25,7 +28,8 @@ const tableColumns = [
   },
   {
     label: "今日单价",
-    prop: "price"
+    prop: "price",
+    cellRenderer: cellRenderer
   },
   {
     label: "今日库存总量",
@@ -33,7 +37,8 @@ const tableColumns = [
   },
   {
     label: "排序",
-    prop: "sortBy"
+    prop: "sortBy",
+    cellRenderer: cellRenderer
   },
   {
     label: "操作",

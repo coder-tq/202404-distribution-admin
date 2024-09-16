@@ -41,7 +41,6 @@ export function sellerTableColumns() {
 
   const inputNumberChange = async (row: any, column: any, e: Event) => {
     row.oldDetailList[column.getColumnIndex() - 1]["count"] = e;
-    // 其他逻辑...
     let data = {
       id: row.id,
       distributorName: row.name,
