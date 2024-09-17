@@ -20,7 +20,7 @@ const onSubmit = async () => {
   await updateCategoryByDate({
     categoryId: formData.value.id,
     price: formData.value.price,
-    inventory: formData.value.inventory,
+    inventory: formData.value.totalInventory,
     sortBy: formData.value.sortBy,
     date: new Date().toISOString()
   });
@@ -50,7 +50,11 @@ const onSubmit = async () => {
         />
       </el-form-item>
       <el-form-item label="类别库存">
-        <el-input v-model="formData.inventory" placeholder="10" clearable />
+        <el-input
+          v-model="formData.totalInventory"
+          placeholder="10"
+          clearable
+        />
       </el-form-item>
       <el-form-item label="类别排序">
         <el-input-number v-model="formData.sortBy" placeholder="10" clearable />
