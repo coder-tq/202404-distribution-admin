@@ -40,7 +40,11 @@ export function sellerTableColumns() {
   }
 
   const inputNumberChange = async (row: any, column: any, e: Event) => {
-    row.oldDetailList[column.getColumnIndex() - 1]["count"] = e;
+    row.oldDetailList.forEach((item: any) => {
+      if (item.categoryName == column.label) {
+        item.count = e;
+      }
+    });
     let data = {
       id: row.id,
       distributorName: row.name,
