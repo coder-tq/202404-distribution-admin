@@ -3,6 +3,7 @@ import { ref, toRefs } from "vue";
 import { getSummaries } from "@/views/seller-admin/base/utils";
 import { upsertDistribution } from "@/api/distribution";
 import { ElMessage } from "element-plus";
+import { printGoodsFileFDF, printPriceFileFDF } from "@/api/file";
 
 type TableColumn = {
   label: string;
@@ -89,13 +90,56 @@ function cellMouseLeaveEvent(row, column, cell, event) {
     col.classList.remove("seller_table-cell-active");
   });
 }
+
+// 勾选
+const multipleSelection = ref([]);
+const handleSelectionChange = val => {
+  multipleSelection.value = val;
+};
+
+// 打印(默认多行)
+const isPrint = ref(false);
+const print = async (printType: string, isSignal: boolean = false, row?) => {
+  const printFunc =
+    printType == "goods" ? printGoodsFileFDF : printPriceFileFDF;
+  const selectedIds = isSignal
+    ? [row.id]
+    : multipleSelection.value.map(row => row.id);
+  if (selectedIds.length === 0) {
+    ElMessage({ message: "未勾选任何数据", type: "warning" });
+    return;
+  }
+  isPrint.value = true;
+  await printFunc(selectedIds).then(response => {
+    const url = window.URL.createObjectURL(
+      new Blob([response], { type: response.type })
+    ); // 文件url
+    const iframe = document.createElement("iframe");
+    iframe.style.display = "none";
+    iframe.src = url;
+    document.body.appendChild(iframe);
+    iframe.onload = () => {
+      iframe.contentWindow.print();
+      iframe.contentWindow.onafterprint = () => {
+        document.body.removeChild(iframe);
+        URL.revokeObjectURL(url);
+      };
+    };
+    isPrint.value = false;
+  });
+  return true;
+};
+
+defineExpose({
+  print
+});
 </script>
 
 <template>
   <pure-table
     id="seller-table"
-    :data="tableData"
     v-loading="tbLoading"
+    :data="tableData"
     :columns="tableColumns"
     :border="true"
     show-summary
@@ -106,6 +150,7 @@ function cellMouseLeaveEvent(row, column, cell, event) {
     header-cell-class-name="seller-table-header-cell"
     @cell-mouse-enter="cellMouseEnterEvent"
     @cell-mouse-leave="cellMouseLeaveEvent"
+    @selection-change="handleSelectionChange"
   >
     <template #operation="{ row }">
       <el-button link type="primary" size="small" @click="handleClick(row)"
@@ -118,6 +163,23 @@ function cellMouseLeaveEvent(row, column, cell, event) {
         size="small"
         @click="handleClickDelete(row)"
         >删除</el-button
+      >
+
+      <el-button
+        link
+        :disabled="isPrint"
+        type="primary"
+        size="small"
+        @click="print('goods', true, row)"
+        >配货单</el-button
+      >
+      <el-button
+        link
+        :disabled="isPrint"
+        type="primary"
+        size="small"
+        @click="print('price', true, row)"
+        >价格单</el-button
       >
     </template>
   </pure-table>

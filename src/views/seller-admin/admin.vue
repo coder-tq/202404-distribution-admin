@@ -59,6 +59,10 @@ const refreshData = async () => {
     console.log("categories", categories);
     tableColumns.value = [
       {
+        type: "selection",
+        align: "left"
+      },
+      {
         label: "买方名称",
         prop: "name",
         fixed: true
@@ -75,7 +79,7 @@ const refreshData = async () => {
         prop: "operation",
         fixed: "right",
         slot: "operation",
-        "min-width": "150px"
+        "min-width": "220px"
       }
     ];
   });
@@ -249,6 +253,25 @@ const options = [
     label: "自提"
   }
 ];
+
+// 打印pdf文件
+const sellerTable = ref(null);
+const isPrint = ref(false);
+async function printSignal(_type: string) {
+  isPrint.value = true;
+  await sellerTable.value
+    .print(_type)
+    .then(() => {
+      isPrint.value = false;
+    })
+    .catch(() => {
+      ElMessage({
+        message: "打印错误",
+        type: "error"
+      });
+      isPrint.value = false;
+    });
+}
 </script>
 
 <template>
@@ -301,10 +324,23 @@ const options = [
             >导出价格单</el-button
           >
           <el-button @click="exportDistributionData">导出汇总数据</el-button>
+          <el-button
+            :disabled="isPrint"
+            type="primary"
+            @click="printSignal('goods')"
+            >打印配货单</el-button
+          >
+          <el-button
+            :disabled="isPrint"
+            type="primary"
+            @click="printSignal('price')"
+            >打印价格单</el-button
+          >
         </el-col>
       </el-row>
       <el-divider />
       <FixColumn
+        ref="sellerTable"
         :table-data="tableData"
         :table-columns="tableColumns"
         :tb-loading="tbLoading"
