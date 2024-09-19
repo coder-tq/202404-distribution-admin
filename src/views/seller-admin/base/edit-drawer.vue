@@ -199,6 +199,8 @@ const heights = computed(() => {
           show-summary
           :summary-method="getSummaries"
           :max-height="heights"
+          header-cell-class-name="edit-table-header-cell"
+          style="font-size: 16px; font-weight: 600"
         />
 
         <!-- 分割线 -->
@@ -218,5 +220,9 @@ const heights = computed(() => {
 
 .demo-form-inline .el-select {
   --el-select-width: 220px;
+}
+
+::v-deep .edit-table-header-cell {
+  color: black !important;
 }
 </style>
