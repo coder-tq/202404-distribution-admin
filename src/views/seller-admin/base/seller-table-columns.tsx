@@ -3,9 +3,9 @@ import { ElMessage } from "element-plus";
 import { ref } from "vue";
 
 export function sellerTableColumns() {
-  const activeIndex = ref(-1);
+  const activeRow = ref(-1);
   const activeColumn = ref(-1);
-
+  const activeValue = ref(null); // 保存旧值
   // 单元格渲染器
   const cellRenderer = ({
     row,
@@ -18,12 +18,20 @@ export function sellerTableColumns() {
   }) => (
     <div
       className="flex-bc h-[32px]"
-      onMouseenter={() => mouseMove(index, column.getColumnIndex())}
-      onmouseleave={() => mouseMove(-1, -1)}
+      onMouseenter={() =>
+        mouseMove(index, column.getColumnIndex(), row[column.property])
+      }
+      onmouseleave={() => mouseMove(-1, -1, null)}
     >
-      {activeIndex.value != index ||
+      {activeRow.value != index ||
       activeColumn.value != column.getColumnIndex() ? (
         <p>{row[column.property] == "0" ? "-" : row[column.property]}</p>
+      ) : activeColumn.value == 1 ? (
+        <el-input
+          v-model={row[column.property]}
+          placeholder="王先生"
+          onChange={e => inputNumberChange(row, column, e)}
+        />
       ) : (
         <el-input-number
           size="small"
@@ -34,17 +42,33 @@ export function sellerTableColumns() {
     </div>
   );
 
-  function mouseMove(rowIndex: number, columnIndex: number) {
-    activeIndex.value = rowIndex;
+  function mouseMove(rowIndex: number, columnIndex: number, oldValue: any) {
+    activeRow.value = rowIndex;
     activeColumn.value = columnIndex;
+    // 移入
+    if (rowIndex != -1 && columnIndex != -1) {
+      activeValue.value = oldValue;
+    }
   }
 
   const inputNumberChange = async (row: any, column: any, e: Event) => {
-    row.oldDetailList.forEach((item: any) => {
-      if (item.categoryName == column.label) {
-        item.count = e;
+    // 修改姓名
+    if (column.getColumnIndex() == 1) {
+      if (!row[column.property]) {
+        ElMessage({
+          message: "姓名不能为空",
+          type: "error"
+        });
+        row[column.property] = activeValue.value;
+        return;
       }
-    });
+    } else {
+      row.oldDetailList.forEach((item: any) => {
+        if (item.categoryName == column.label) {
+          item.count = e;
+        }
+      });
+    }
     let data = {
       id: row.id,
       distributorName: row.name,

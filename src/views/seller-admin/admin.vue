@@ -66,6 +66,7 @@ const refreshData = async () => {
         label: "买方名称",
         prop: "name",
         fixed: true,
+        cellRenderer: cellRenderer,
         "min-width": 140
       },
       ...categories.map(item => ({
