@@ -22,7 +22,7 @@ export function getSummaries(param) {
       sums[index] = `${values.reduce((prev, curr) => {
         const value = Number(curr);
         if (!Number.isNaN(value)) {
-          return math.add(prev, curr);
+          return math.add(math.bignumber(prev), math.bignumber(curr));
         } else {
           return prev;
         }
