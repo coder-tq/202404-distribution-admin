@@ -28,7 +28,10 @@ export function getSummaries(param) {
         }
       }, 0)}`;
     } else {
-      sums[index] = "N/A";
+      sums[index] = "";
+    }
+    if (sums[index] == "0") {
+      sums[index] = "";
     }
   });
 

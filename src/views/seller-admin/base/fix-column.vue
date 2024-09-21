@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, toRefs } from "vue";
+import { onBeforeUnmount, onMounted, ref, toRefs } from "vue";
 import { getSummaries } from "@/views/seller-admin/base/utils";
 import { upsertDistribution } from "@/api/distribution";
 import { ElMessage } from "element-plus";
@@ -133,15 +133,54 @@ const print = async (printType: string, isSignal: boolean = false, row?) => {
 defineExpose({
   print
 });
+
+// 横向滚动条
+const sellerTable = ref(null);
+let bodyWrapper = null;
+let footerWrapper = null;
+let isSyncing = false;
+
+const syncScroll = (source, target) => {
+  if (isSyncing) return;
+  isSyncing = true;
+  target.scrollLeft = source.scrollLeft;
+  isSyncing = false;
+};
+
+onMounted(() => {
+  const table = sellerTable.value;
+  if (table) {
+    // 获取主体和页脚的滚动容器
+    bodyWrapper = table.$el.querySelector(
+      ".el-table__body-wrapper .el-scrollbar .el-scrollbar__wrap"
+    );
+    footerWrapper = table.$el.querySelector(".el-table__footer-wrapper");
+
+    if (bodyWrapper && footerWrapper) {
+      // 当页脚滚动时，同步到主体
+      footerWrapper.addEventListener("scroll", () => {
+        syncScroll(footerWrapper, bodyWrapper);
+      });
+    }
+  }
+});
+
+onBeforeUnmount(() => {
+  if (bodyWrapper && footerWrapper) {
+    bodyWrapper.removeEventListener("scroll", () => {});
+    footerWrapper.removeEventListener("scroll", () => {});
+  }
+});
 </script>
 
 <template>
   <pure-table
     id="seller-table"
+    ref="sellerTable"
     v-loading="tbLoading"
     :data="tableData"
     :columns="tableColumns"
-    :border="true"
+    border
     show-summary
     :summary-method="getSummaries"
     class="!h-[70vh]"
@@ -171,16 +210,18 @@ defineExpose({
         type="primary"
         size="small"
         @click="print('goods', true, row)"
-        >配货单</el-button
       >
+        配货单
+      </el-button>
       <el-button
         link
         :disabled="isPrint"
         type="primary"
         size="small"
         @click="print('price', true, row)"
-        >价格单</el-button
       >
+        价格单
+      </el-button>
     </template>
   </pure-table>
 </template>
@@ -207,5 +248,14 @@ defineExpose({
   .el-button:hover {
     color: #002ead !important;
   }
+}
+
+.el-scrollbar .el-scrollbar__bar.is-horizontal .el-scrollbar__thumb {
+  height: 0 !important;
+}
+
+.el-table__footer-wrapper {
+  overflow-x: auto;
+  border-top: 1px solid #f4f4f4;
 }
 </style>

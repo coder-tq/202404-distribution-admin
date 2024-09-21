@@ -19,13 +19,19 @@ export function sellerTableColumns() {
     <div
       className="flex-bc h-[32px]"
       onMouseenter={() =>
-        mouseMove(index, column.getColumnIndex(), row[column.property])
+        mouseMove(
+          index,
+          column.getColumnIndex(),
+          row[column.property],
+          row,
+          column
+        )
       }
       onmouseleave={() => mouseMove(-1, -1, null)}
     >
       {activeRow.value != index ||
       activeColumn.value != column.getColumnIndex() ? (
-        <p>{row[column.property] == "0" ? "-" : row[column.property]}</p>
+        <p>{row[column.property] == "0" ? "" : row[column.property]}</p>
       ) : activeColumn.value == 1 ? (
         <el-input
           v-model={row[column.property]}
@@ -37,16 +43,33 @@ export function sellerTableColumns() {
           size="small"
           v-model={row[column.property]}
           onChange={e => inputNumberChange(row, column, e)}
+          onblur={() => mouseMove(-1, -1, null)}
         />
       )}
     </div>
   );
 
-  function mouseMove(rowIndex: number, columnIndex: number, oldValue: any) {
+  function mouseMove(
+    rowIndex: number,
+    columnIndex: number,
+    oldValue: any,
+    row?,
+    column?
+  ) {
     activeRow.value = rowIndex;
     activeColumn.value = columnIndex;
     // 移入
     if (rowIndex != -1 && columnIndex != -1) {
+      // 转换类型
+      if (
+        activeRow.value == rowIndex &&
+        activeColumn.value == columnIndex &&
+        activeColumn.value != 1 &&
+        row[column.property]
+      ) {
+        row[column.property] = Number(row[column.property]);
+        oldValue = row[column.property];
+      }
       activeValue.value = oldValue;
     }
   }
