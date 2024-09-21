@@ -255,7 +255,37 @@ onBeforeUnmount(() => {
 }
 
 .el-table__footer-wrapper {
+  box-sizing: border-box;
   overflow-x: auto;
   border-top: 1px solid #f4f4f4;
+
+  /* 定义滚动条宽高及背景，宽高分别对应横竖滚动条的尺寸 */
+  // 滚动条整体部分
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 12px;
+  }
+  // 滚动条的轨道的两端按钮，允许通过点击微调小方块的位置。
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
+  // 滚动条里面的小方块，能向上向下移动（或往左往右移动，取决于是垂直滚动条还是水平滚动条）
+  &::-webkit-scrollbar-thumb {
+    cursor: pointer;
+    background: #dddee0;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #d1d4d7;
+  }
+  // 边角，即两个滚动条的交汇处
+  &::-webkit-scrollbar-corner {
+    display: none;
+  }
+  // 两个滚动条的交汇处上用于通过拖动调整元素大小的小控件
+  &::-webkit-resizer {
+    display: none;
+  }
 }
 </style>
