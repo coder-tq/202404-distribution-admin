@@ -43,7 +43,6 @@ export function sellerTableColumns() {
           size="small"
           v-model={row[column.property]}
           onChange={e => inputNumberChange(row, column, e)}
-          onblur={() => mouseMove(-1, -1, null)}
         />
       )}
     </div>
@@ -74,7 +73,7 @@ export function sellerTableColumns() {
     }
   }
 
-  const inputNumberChange = async (row: any, column: any, e: Event) => {
+  const inputNumberChange = async (row, column, e: Event) => {
     // 修改姓名
     if (column.getColumnIndex() == 1) {
       if (!row[column.property]) {
@@ -86,11 +85,27 @@ export function sellerTableColumns() {
         return;
       }
     } else {
-      row.oldDetailList.forEach((item: any) => {
-        if (item.categoryName == column.label) {
-          item.count = e;
-        }
-      });
+      const targetElement = row.distributionDetailList.find(
+        item => item.categoryName === column.label
+      );
+
+      if (targetElement) {
+        // 存在对应品种数据
+        targetElement.count = e;
+      } else {
+        // 新建品种数据
+        const targetElement = row.categories.find(
+          item => item.name === column.label
+        );
+        row.distributionDetailList.push({
+          categoryId: targetElement.id,
+          categoryName: targetElement.name,
+          categoryCode: targetElement.code,
+          price: targetElement.price,
+          count: e,
+          sortBy: targetElement.sortBy
+        });
+      }
     }
     let data = {
       id: row.id,
@@ -99,7 +114,7 @@ export function sellerTableColumns() {
       distributorPhone: row.phone,
       date: row.date.toISOString(),
       distributorSortBy: row.sortBy,
-      distributionDetailList: row.oldDetailList
+      distributionDetailList: row.distributionDetailList
     };
     await upsertDistribution(data);
     ElMessage({

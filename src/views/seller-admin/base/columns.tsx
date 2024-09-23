@@ -1,7 +1,6 @@
 import { ref, computed } from "vue";
 
 import EditPen from "@iconify-icons/ep/edit-pen";
-import Check from "@iconify-icons/ep/check";
 
 export function useColumns() {
   const editMap = ref({});
@@ -46,13 +45,12 @@ export function useColumns() {
       onMouseleave={() => onMouseleave(index, column.getColumnIndex())}
     >
       {
-      //   !editing.value(index, column.getColumnIndex()) ? (
-      //   <p>
-      //     {column.property === "price" ? "￥" : ""}
-      //     {row[column.property]}
-      //   </p>
-      // ) :
-          (
+        //   !editing.value(index, column.getColumnIndex()) ? (
+        //   <p>
+        //     {column.property === "price" ? "￥" : ""}
+        //     {row[column.property]}
+        //   </p>
+        // ) :
         <>
           <el-input-number size="small" v-model={row[column.property]} />
           {/*<iconify-icon-offline*/}
@@ -61,7 +59,7 @@ export function useColumns() {
           {/*  onClick={() => onSave(index, column.getColumnIndex())}*/}
           {/*/>*/}
         </>
-      )}
+      }
       {activeIndex.value == index &&
       activeColumn.value == column.getColumnIndex() ? (
         <iconify-icon-offline
@@ -155,9 +153,9 @@ export function useColumns() {
     editMap.value[index][column] = Object.assign({}, row, { editing: true });
   }
 
-  function onSave(index, column) {
-    editMap.value[index][column].editing = false;
-  }
+  // function onSave(index, column) {
+  //   editMap.value[index][column].editing = false;
+  // }
 
   return {
     columns,

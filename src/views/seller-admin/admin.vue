@@ -31,18 +31,20 @@ const dataList: Ref<DistributionVO[]> = ref([]);
 // 将表格数据拍平
 const tableData = computed(() => {
   return dataList.value.map(item => {
-    const obj = {
+    let obj = {
       id: item.id,
       name: item.distributorName,
       phone: item.distributorPhone,
       distributionType: item.distributionType,
       date: date.value,
       sortBy: item.distributorSortBy,
-      oldDetailList: item.distributionDetailList
+      distributionDetailList: [],
+      categories: categories
     };
     item.distributionDetailList.forEach(category => {
       obj[category.categoryCode] = category.count;
     });
+    obj.distributionDetailList = item.distributionDetailList;
     return obj;
   });
 });
@@ -56,7 +58,6 @@ const refreshData = async () => {
   // 根据日期获取分类（表头）
   await getCategoryByDate(date.value.toISOString()).then(res => {
     categories = res.data;
-    console.log("categories", categories);
     tableColumns.value = [
       {
         type: "selection",
@@ -112,7 +113,6 @@ let inventory = ref([]);
 const editDrawer = ref(null);
 
 function defineData(row) {
-  console.log("current row", row);
   if (!row.id) {
     formData.value = { date: date.value, sortBy: 0 };
     formTableData.value = [];
@@ -125,7 +125,7 @@ function defineData(row) {
           categoryName: category.name,
           categoryCode: category.code,
           count: 0,
-          price: category.price
+          price: Number(category.price)
         });
       }
     });
@@ -153,7 +153,7 @@ function defineData(row) {
         categoryName: category.name,
         categoryCode: category.code,
         count: 0,
-        price: category.price
+        price: Number(category.price)
       });
     }
   });

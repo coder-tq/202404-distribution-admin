@@ -13,12 +13,8 @@ import {
 } from "vue";
 import { useColumns } from "./columns";
 import { ElMessage } from "element-plus";
-import type { TableColumnCtx } from "element-plus";
 import { getSummaries } from "@/views/seller-admin/base/utils";
-import { createDistributor, updateDistributor } from "@/api/distributor";
-import { exportImg } from "@/utils/exportImage";
 import { upsertDistribution } from "@/api/distribution";
-import router from "@/router";
 import { all, create } from "mathjs";
 
 const { columns } = useColumns();
