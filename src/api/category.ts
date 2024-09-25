@@ -8,6 +8,7 @@ export type Category = {
   code: string;
   price: string;
   inventory: string | number;
+  sortBy: number;
 };
 
 export const getCategoryByDate = (date: string) => {

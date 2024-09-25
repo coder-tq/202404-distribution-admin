@@ -116,34 +116,20 @@ function defineData(row) {
   if (!row.id) {
     formData.value = { date: date.value, sortBy: 0 };
     formTableData.value = [];
-    categories.forEach(category => {
-      var find = formTableData.value.find(
-        item => item.categoryCode === category.code
-      );
-      if (!find) {
-        formTableData.value.push({
-          categoryName: category.name,
-          categoryCode: category.code,
-          count: 0,
-          price: Number(category.price)
-        });
-      }
-    });
-
-    inventory.value = categories;
-    return;
+  } else {
+    formData.value = {
+      id: row.id,
+      user: row.name,
+      phone: row.phone,
+      date: date,
+      sortBy: row.sortBy,
+      distributionType: row.distributionType
+    };
+    formTableData.value = dataList.value.find(
+      item => item.id === row.id
+    ).distributionDetailList;
   }
-  formData.value = {
-    id: row.id,
-    user: row.name,
-    phone: row.phone,
-    date: date,
-    sortBy: row.sortBy,
-    distributionType: row.distributionType
-  };
-  formTableData.value = dataList.value.find(
-    item => item.id === row.id
-  ).distributionDetailList;
+  let sortTableData = [];
   categories.forEach(category => {
     var find = formTableData.value.find(
       item => item.categoryCode === category.code
@@ -153,12 +139,14 @@ function defineData(row) {
         categoryName: category.name,
         categoryCode: category.code,
         count: 0,
-        price: Number(category.price)
+        price: Number(category.price),
+        sortBy: category.sortBy
       });
     }
   });
-
+  formTableData.value.sort((a, b) => a.sortBy - b.sortBy);
   inventory.value = categories;
+  return;
 }
 
 const clickExport = row => {
