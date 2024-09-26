@@ -1,0 +1,42 @@
+name: Build and Package
+
+on:
+  push:
+    branches:
+      - dev_x  # 或指定您想要触发的分支
+  pull_request:
+    branches:
+      - dev_x
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v3
+
+      - name: 设置 Node.js 环境
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # 替换为您项目需要的 Node.js 版本
+          cache: 'pnpm'
+
+      - name: 安装 pnpm
+        run: npm install -g pnpm
+
+      - name: 安装依赖
+        run: pnpm install
+
+      - name: 构建项目
+        run: pnpm build  # 根据您的项目构建命令调整
+
+      # 如果需要打包成压缩文件，可以添加以下步骤
+      - name: 打包应用
+        run: |
+          tar -czf my-app.tar.gz ./build  # 假设构建输出在 ./build 目录
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-app-artifact
+          path: my-app.tar.gz
