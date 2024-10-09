@@ -218,7 +218,7 @@ const heights = computed(() => {
   --el-select-width: 220px;
 }
 
-::v-deep .edit-table-header-cell {
+:deep(.edit-table-header-cell) {
   color: black !important;
 }
 </style>
