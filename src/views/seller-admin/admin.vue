@@ -129,7 +129,6 @@ function defineData(row) {
       item => item.id === row.id
     ).distributionDetailList;
   }
-  let sortTableData = [];
   categories.forEach(category => {
     var find = formTableData.value.find(
       item => item.categoryCode === category.code
