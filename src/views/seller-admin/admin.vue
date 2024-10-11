@@ -144,6 +144,8 @@ function defineData(row) {
     }
   });
   formTableData.value.sort((a, b) => a.sortBy - b.sortBy);
+  formTableData.value.map(a => (a.price = Number(a.price)));
+  formTableData.value.map(a => (a.count = Number(a.count)));
   inventory.value = categories;
   return;
 }

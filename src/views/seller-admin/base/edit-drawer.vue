@@ -188,7 +188,6 @@ const heights = computed(() => {
 
         <pure-table
           class="!w-[80vw];display: flex;justify-content: center;"
-          row-key="id"
           border
           :data="computeTableData"
           :columns="columns"
